@@ -23,29 +23,31 @@ to edit)
 
 ## Introduction
 
--   Clearly state the problem or question you're addressing.
-
--   Introduce why it is relevant needs.
-
--   Provide an overview of your approach.
-
 The LASSO, Least Absolute Shrinkage and Selector Operator, regression
 model has become very popular over the last 30 years. The model was
 first introduced by Robert Tibshirani to perform variable selection and
 regularization to improve prediction accuracy and interpretability
-[@emmert2019high]. Over the years, it has been used to research topics
-in a numerous amount of fields including biology, computational social
-sciences, social media, the stock market, economy, political science,
-robotics, climatology, and pharmacology [@emmert2019high]. In LASSO
-regression, the prediction error is minimized by identifying the
-variables and corresponding regression coefficients and then putting
-constraints on the model which pushes the regression coefficients to
-zero [@ranstam2018lasso]. Due to this, this regression model works
-extremely well with outliers, thus dealing with large-scale problems
-very efficiently [@roth2004generalized].
+[@emmert2019high]. Since its introduction, LASSO has been used to
+research topics in a numerous amount of fields including biology,
+computational social sciences, social media, the stock market, economy,
+political science, robotics, climatology, and pharmacology
+[@emmert2019high]. In LASSO regression, the prediction error is
+minimized by identifying the variables and corresponding regression
+coefficients and then putting constraints on the model which pushes the
+regression coefficients to zero [@ranstam2018lasso]. Due to this, this
+regression model works extremely well with outliers, thus dealing with
+large-scale problems very efficiently [@roth2004generalized].
 
-The goal of this analysis, using LASSO regression, is to estimate the
-survival rate of breast cancer patients. ...
+The goal of this analysis is to use LASSO regression to identify factors
+that are most strongly associated with survival in breast cancer
+patients. "Breast cancer is the most frequent cancer in women and is the
+second most common cancer across the globe" [@usman2021comparing].
+Understanding which clinical and demographic factors are most predictive
+in patient survival may help to improve prognostic modeling and support
+more informed clinical decision-making. Using data from the SEER
+dataset, this analysis will use a Cox proportional hazards model to
+perform variable selection and identify key predictors of breast cancer
+survival.
 
 ## Methods
 
@@ -56,7 +58,7 @@ survival rate of breast cancer patients. ...
 LASSO regression can be defined by [@emmert2019high]:
 
 $$
-\hat{\beta} = arg \space \min \{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\} 
+\hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\} 
 $$
 
 where (define variables)
