@@ -23,274 +23,82 @@ to edit)
 
 ## Introduction
 
-The LASSO, Least Absolute Shrinkage and Selector Operator, regression
-model has become very popular over the last 30 years. The model was
-first introduced by Robert Tibshirani to perform variable selection and
-regularization to improve prediction accuracy and interpretability .
-Since its introduction, LASSO has been used to research topics in
-numerous fields including biology, computational social sciences, social
-media, the stock market, economy, political science, robotics,
-climatology, and pharmacology [@emmert2019high]. In LASSO regression,
-the prediction error is minimized by identifying the variables and
-corresponding regression coefficients and then putting constraints on
-the model which pushes the regression coefficients to zero
-[@ranstam2018lasso]. Those coefficients are then eliminated from the
-model reducing its complexity.
+The LASSO (Least Absolute Shrinkage and Selection Operator) regression
+model has become increasingly popular over the past 30 years. It was
+first introduced by Robert Tibshirani as a method for variable selection
+and regularization to improve prediction accuracy and interpretability.
+Since then, LASSO has been widely applied across many fields, including
+biology, computational social sciences, social media, the stock market,
+economics, political science, robotics, climatology, and pharmacology
+[@emmert2019high].
 
-LASSO reduces model complexity by adding an L1 penalty term added to the
-loss function which constrains the sum of the absolute values of the
-regression coefficients [@ranstam2018lasso]. This penalty is what
-shrinks the weaker predictors to zero and is effectively performing
-automatic variable selection [@usman2021comparing]. Due to this, the
-LASSO regression model can still work with outliers, thus dealing with
-large-scale problems very efficiently [@roth2004generalized]. By
-reducing overfitting and emphasizing the most relevant predictors, LASSO
-produces a more interpretable model which is key in clinical survival
-modeling where interpretability and reproducibility are critical for
-predicting patient outcomes [@ranstam2018lasso].
+Regression is a fundamental task in supervised machine learning, used to
+model relationships between variables and address key challenges such as
+parameter estimation and variable selection [@muthukrishnan2016lasso].
+As machine learning methods continue to grow in popularity and show
+strong results, their importance in research has increased. In medicine
+especially, predictive models developed through machine learning can
+help professionals distinguish between risk groups, design personalized
+treatment plans, and improve patient survival outcomes
+[@huang2023practical].
 
-The goal of this analysis is to use LASSO regression to identify factors
-most strongly associated with survival in breast cancer patients. Cancer
-has a substantial impact on society worldwide. In 2025, an estimated
-2,041,910 new cancer cases will be diagnosed in the United States, and
-approximately 618,120 people are expected to die from the disease
-[@siegel2025cancer].
+LASSO regression works by minimizing prediction error while applying a
+constraint that shrinks some regression coefficients toward zero
+[@ranstam2018lasso]. It does this by adding an L1 penalty term to the
+loss function, which constrains the sum of the absolute values of the
+coefficients [@ranstam2018lasso]. This penalty forces weaker predictors
+to exactly zero, effectively performing automatic variable selection
+[@usman2021comparing]. In other words, LASSO minimizes the residual sum
+of squares subject to a constraint on the absolute values of the
+coefficients, producing models that are simpler and easier to interpret
+[@tibshirani1996regression]. By reducing overfitting and focusing on the
+most relevant predictors, LASSO produces more interpretable models,
+which is especially important in clinical survival analysis where
+clarity and reproducibility matter [@ranstam2018lasso]. It is also
+effective for handling large-scale problems and high-dimensional data
+[@roth2004generalized].
 
-Breast cancer represents a particularly significant public health
-concern. By 2019, the number of individuals living with breast cancer in
-the United States was estimated to exceed 3.8 million, and it remains
-the most frequently diagnosed cancer among women and the second most
-common cancer globally [@usman2021comparing]. Understanding which
-clinical and demographic factors are most predictive in patient survival
-may help to improve prognostic modeling and support more informed
-clinical decision-making. Using the Surveillance, Epidemiology, and End
-Results (SEER) dataset, this analysis will determine the most prominent
-variables in breast cancer survivability. This dataset includes the
-variables age, race, marital status, T stage, N stage, 6th stage, grade,
-A stage, tumor size, estrogen status, progesterone status, regional node
-examined, regional node positive, survival months, and status.
+The goal of this analysis is to use LASSO regression to identify the
+factors most strongly associated with survival in breast cancer
+patients. Cancer continues to have a major impact worldwide. In 2025, an
+estimated 2,041,910 new cancer cases will be diagnosed in the United
+States, and approximately 618,120 people are expected to die from the
+disease [@nci2025statistics]. Breast cancer remains a significant public
+health concern. By 2019, more than 3.8 million individuals in the United
+States were living with breast cancer, and it is still the most commonly
+diagnosed cancer among women and the second most common cancer globally
+[@usman2021comparing]. Breast cancer begins in the breast’s feeding
+tissues and develops in the epithelial cells of the ducts (85% of cases)
+and lobules (15%) and is influenced by factors including hereditary
+factors, age, postmenopausal obesity, alcohol or smoking, and other
+factors [@hadba2024comparison]. Identifying the clinical and demographic
+factors most strongly linked to survival can help improve prognostic
+models and support better clinical decision-making. Previous research
+has identified numerous factors associated with breast cancer prognosis
+and survival. These factors are commonly grouped into three categories:
+(1) demographic and genetic characteristics, such as age at diagnosis,
+marital status, and reproductive history; (2) clinicopathological
+factors, including tumor location, size, and histologic grade; and (3)
+treatment-related variables, such as drug therapy, radiotherapy, and
+chemotherapy [@teng2022dynamic].
 
-These variables will now be further defined from the SEER dataset
-[@Teng2019SEER] . Age is the age at diagnosis, race is the race of the
-patient, and marital status at the time of diagnosis includes married
-(including common law), single (never married), widowed, divorced and
-separated. T stage is the size of the tumor where T1 is tumor ≤ 2 cm, T2
-is tumor \> 2 cm but ≤ 5 cm, T3 is tumor \> 5cm, and T4 is a tumor that
-is any size which has directly invaded the chest wall, skin, or is
-classified as inflammatory. N stage is the number of lymph nodes
-involved where N1 is 1-3 positive lymph nodes, N2 is 4-9 positive lymph
-nodes, and N3 is 10+ positive nodes or specific node groups. 6th stage
-is the overall stage of cancer which includes IIA, IIB, IIC, IIIA, IIIB,
-and IIIC. Next is the grade of the breast cancer which is broken down
-into grade I, grade II, grade III, and grade IV. A stage is defined by
-either regional or distant. Tumor size is the size of the tumor at the
-time of diagnosis. Estrogen status is the status of the estrogen
-receptor which is defined as either negative or positive. Progesterone
-status is the status of the progesterone receptor which is again either
-negative or positive. Regional node examined is whether the regional
-lymph nodes were examined and if so then how many. Regional node
-positive states how many of the regional lymph nodes were positive for
-cancer. Survival months states the number of months the patient survived
-after diagnosis. Lastly, status states whether the patient is alive or
-passed away.
+To accomplish this, the analysis uses the Surveillance, Epidemiology,
+and End Results (SEER) dataset to determine the most important variables
+associated with breast cancer survivability. SEER has collected and
+maintained high-quality, validated data on mortality among cancer
+survivors, allowing for analysis of overall and cause-specific death
+patterns [@xu2022lasso]. The dataset includes variables such as age,
+race, marital status, T stage, N stage, 6th stage, grade, A stage, tumor
+size, estrogen status, progesterone status, regional nodes examined,
+regional nodes positive, survival months, and status [@Teng2019SEER].
 
-While LASSO regression has proven valuable across many scientific
-research areas, it is particularly well suited for medical research
-where identifying the most influential predictors is essential for
-improving patient outcomes. Using this data, the analysis applies LASSO
-regression to perform variable selection on the defined variables and
-identify the key predictors of breast cancer survival.
-
-ChatGPT was used to help review grammar and clarity of this
-introduction.
-
-## **Article Reviews:**
-
-**High-Dimensional LASSO-Based Computational Regression Models**
-
-This article summarizes high-dimensional LASSO-based computational
-regression models as an effective solution for situations in which the
-number of predictors is large relative to the sample size. The defining
-feature of LASSO is the use of an L1 penalty that performs coefficient
-shrinkage and variable selection which reduces weak or irrelevant
-predictors to a coefficient of zero. This regression model is good for
-biomedical, genomic, engineering applications where multicollinearity
-and overfitting are common challenges. It highlights how LASSO improves
-model interpretability, numerical stability, and predictive performance
-compared to unregularized regression by controlling variance without
-sacrificing key signal variables. Overall, it is shown that LASSO is
-used for high-dimensional regression, offering a balance between model
-complexity and predictive accuracy.
-
-**LASSO Regression**
-
-LASSO regression is a great method for addressing issues that other
-models tend to struggle with, like overfitting or being overly
-optimistic about their predictions. The model minimizes prediction error
-by putting constraints on the model parameters which forces coefficients
-towards zero. Then, the coefficients that are zero are removed from the
-model. This limit is controlled by a value called λ. A benefit of doing
-this is that it reduces overfitting in the model. A disadvantage of the
-model is that because the focus in on the best combined prediction, it
-may not be reliable in terms of independent risk factors. Although LASSO
-regression is a strong model that often outperforms other methods, it is
-not perfect and may miss some subtle patterns in the data.
-
-**The Generalized LASSO**
-
-This article summarizes what the least absolute shrinkage and selection
-operator (LASSO) regression model is. It emphasizes LASSO's role as a
-regularization method that automaticlaly performs variable selection by
-shrinking many coefficients exactly to zero, reducing model complexity
-without sacrificing predictive accuracy. It can be optimized to
-guarantee convergence which makes it good to use for large-scale
-regression problems. Generalized LASSO maintains sparsity while
-improving computational scalability and robustness to outliers. Its
-effectiveness is highlighted by performing well with fewer active
-variables which is highly effective in high-dimensional regression.
-
-**Comparing the Prediction Accuracy of Ridge, LASSO and Elastic Net
-Regression Models with Linear Regression Using Breast Cancer Data**
-
-This paper used 3 different methods to determine factors that can help
-determine the survivability of breast cancer patients. This is important
-because it can help determine what factors can predict the survivability
-of breast cancer. LASSO had the lowest prediction error and most
-effective variable selection. Of the 14 variables examined, 8 of them
-were significant in predicting breast cancer. The LASSO model identified
-seven key predictors of survival, making it the most precise. Patients
-in the age range of 60-90, that are in stage 2 and stage 3 of the
-disease have a lower survival time. One of the limitations in this paper
-is that it had a smaller number of patients that it used in
-Zaria-Nigeria so it was recommended to look at a broader range of
-data.  
-
-**Identification of genes associated with survival of breast cancer\
-patients**
-
-This study looked at different microRNA and mRNA data to predict
-survivability in breast cancer. LASSO regression was used to identify 10
-out of 56 microRNA's with non-zero coefficients that are associated with
-prognosis of breast cancer patients. This is important because it can
-help improve risk stratification, prognosis, and personalized treatment
-planning for breast cancer patients. LASSO regression was the best
-method for working with this data due to it being high-dimensional and
-noisy. It was solved by classifying patients into high and low risk
-survival groups. This research also included a single limited public
-dataset, so additional biological experiments should be done. 
-
-**Development of a prediction model based on LASSO regression to
-evaluate the risk of non‑sentinel lymph node metastasis in Chinese
-breast cancer patients with 1–2 positive sentinel lymph nodes**
-
-This paper is similar to what we are researching although it's strictly
-looking at lymph nodes as a factor in breast cancer patients. This paper
-is important because it is specifically looking at Chinese patients, so
-it covers Western populations and how care may be limited for Eastern
-patients. LASSO regression was applied to select the most informative
-predictors and build the risk score model. The model performance was
-evaluated by looking at the area under the receiver operating
-characteristic curve (AUC). LASSO performed well and found that 30% of
-patients could possibly avoid axillary lymph node dissection
-(ALND). This study was conducted at one research center so it is
-recommended that this study be applied to a larger group to confirm
-generalization. Overall, this approach can help doctors decide who
-actually needs more invasive lymph node surgery and who can safely avoid
-it. 
-
-**Comparison of lasso logistic regression, artificial neural networks,
-and support vector machine in predicting breast cancer**
-
-This study evaluates LASSO Logistic Regression as a tool for classifying
-breast tumors as benign or malignant and compares its performance
-against other regression models using the Wisconsin Diagnostic Breast
-Cancer (WDBC) dataset. LASSO was used by adding the L1 penalty to the
-function to find the strongest variables. This is shown to work well in
-high-dimensional medical datasets where the data can be highly
-correlated. The data was split into 80% training and 20% testing sets.
-LASSO outpreformed all of the other logistic regression models that it
-was compared to.
-
-**A Machine Learning Model for Predicting Breast Cancer Recurrence and
-Supporting Personalized Treatment Decisions Through Comprehensive
-Feature Selection and Explainable Ensemble Learning**
-
-This study was conducted using the LASSO regression model to predict
-breast cancer recurrence and support personalized treatment decisions.
-Data were collected from 1,131 breast cancer patients using the health
-record system at Kaohsiung Medical University Hospital. Using key
-clinical and predictor factors, the model identified patients at higher
-risk of recurrence. The study also used SHAP analysis to explain the
-model results and support clinical decision-making. This model
-outperformed a single model previously used for the same purpose.
-
-**Logistic LASSO Regression for Dietary Intakes and Breast Cancer**
-
-The goal of this study was to use LASSO regression to examine the
-relationship between dietary intakes and breast cancer in women aged 50
-and older. The model looked at 29 dietary variables alongside
-well-established breast cancer risk factors. This research is important
-because it could help women, especially those at higher risk, such as
-BRCA gene carriers, identify foods to avoid. The study used NHANES
-survey data and R software. LASSO regression with ten-fold
-cross-validation was employed to select important predictors while
-avoiding overfitting. Overall, there was no strong correlation between
-dietary intake or restrictions and time since diagnosis, except for
-alcohol, which showed a positive association. A statistically
-significant association was found between higher vitamin B12 intake and
-breast cancer.
-
-**A LASSO-based survival prediction model for patients with synchronous
-colorectal carcinomas based on SEER**
-
-This study uses LASSO-based Cox regression to model and predict the
-overall survival of patients with synchronous colorectal carcinomas. The
-data came from the SEER database, which included patients diagnosed with
-colorectal cancer more than once between 2004 and 2013. The LASSO-Cox
-model was compared to the standard Cox model using the same dataset to
-determine if the LASSO-based regression produced a more accurate
-prediction. The LASSO-based Cox model performed better by selecting the
-most important variables while reducing overfitting. It showed that
-certain patient and tumor characteristics, such as age, tumor depth,
-sex, and whether chemotherapy was given, are important predictors of
-survival. The LASSO model predicted that older men with T3 tumors are at
-higher risk, and the model’s decision-curve analysis suggests it can
-guide clinical decisions to improve patient outcomes.
-
-**A practical recurrence risk model based on Lasso-Cox regression for
-gastric cancer**
-
-A dataset of 1,851 patients with gastric cancer was used to build models
-that predict recurrence after treatment and help improve patient
-outcomes. Several methods including LASSO regression, Cox regression,
-and nomogram analysis were used for selecting variables, constructing
-the models, and validating their performance so the results could be
-compared. LASSO regression helped reduce overfitting and
-multicollinearity by keeping only the most relevant factors, while the
-other approaches included more variables. The findings showed that
-pathological stage, tumor size, lymph node status, intraoperative blood
-loss, and AFP and CA199 levels were strongly linked to gastric cancer
-recurrence after radical gastrectomy, and the final model showed good
-accuracy and calibration. The multivariable Cox model also performed
-well and could be useful for guiding more personalized treatment plans.
-
-**Penalized Cox regression analysis in the high-dimensional and
-low-sample size settings, with applications to microarray gene
-expression data**
-
-The main goal of this paper is to adapt the LASSO penalization to the
-Cox proportional hazards framework since this type of analysis works
-best for predicting survivability.  It is shown to be a more reliable
-model for survival outcomes when the number of predictors is large to
-the number of observations.  The paper addresses how to build
-interpretable survival models when the data are high-dimensional and
-noisy.  This is shown to be relevant in modern cancer research. The
-study extends the LASSO penalization to the Cox proportional hazards
-framework by adding an L1 penalty to the Cox partial likelihood. It was
-shown that it has a strong predictive performance and effective variable
-selection.  Limitations of this study was that performance can degrade
-when predictors are highly correlated and that LASSO can mis predictors
-with small but real effects. 
+Although LASSO regression has been valuable across many research areas,
+it is particularly useful in medical studies where identifying the most
+influential predictors is essential for improving patient outcomes.
+Using the SEER data, this study applies LASSO regression for feature
+selection to identify key clinical variables associated with breast
+cancer survival outcomes while reducing overfitting and improving model
+stability [@lee2025machine].
 
 ## Methods
 
@@ -318,37 +126,7 @@ where (define variables)
 
 A study was conducted to determine how...
 
-```{r, warning=FALSE, echo=T, message=FALSE}
-# loading packages 
-library(tidyverse)
-library(knitr)
-library(ggthemes)
-library(ggrepel)
-library(dslabs)
-```
-
-```{python}
-import pandas as pd
-```
-
-```{r, warning=FALSE, echo=TRUE}
-# Load Data
-kable(head(murders))
-
-ggplot1 = murders %>% ggplot(mapping = aes(x=population/10^6, y=total)) 
-
-  ggplot1 + geom_point(aes(col=region), size = 4) +
-  geom_text_repel(aes(label=abb)) +
-  scale_x_log10() +
-  scale_y_log10() +
-  geom_smooth(formula = "y~x", method=lm,se = F)+
-  xlab("Populations in millions (log10 scale)") + 
-  ylab("Total number of murders (log10 scale)") +
-  ggtitle("US Gun Murders in 2010") +
-  scale_color_discrete(name = "Region")+
-      theme_bw()
-  
-
+```{r}
 ```
 
 ### Modeling and Results
