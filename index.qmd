@@ -90,7 +90,7 @@ survivors, allowing for analysis of overall and cause-specific death
 patterns [@xu2022lasso]. The dataset includes variables such as age,
 race, marital status, T stage, N stage, 6th stage, grade, A stage, tumor
 size, estrogen status, progesterone status, regional nodes examined,
-regional nodes positive, survival months, and status [@Teng2019SEER].
+regional nodes positive, survival months, and status [@sembay2021seer].
 
 Although LASSO regression has been valuable across many research areas,
 it is particularly useful in medical studies where identifying the most
@@ -104,32 +104,163 @@ stability [@lee2025machine].
 
 -   Detail the models or algorithms used.
 
--   Justify your choices based on the problem and data.
-
-LASSO regression can be defined by [@emmert2019high]:
-
-$$
-\hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\} 
-$$
-
-where (define variables)
+-    Justify your choices based on the problem and data.
 
 ## Analysis and Results
 
 ### Data Exploration and Visualization
 
--   Describe your data sources and collection process.
+This study uses breast cancer data from the Surveillance, Epidemiology,
+and End Results (SEER) program, which is maintained by the National
+Cancer Institute (NCI). The dataset, composed of 4,024 patients,
+includes demographic, clinical, and outcome variables for female
+patients diagnosed with infiltrating ductal and lobular breast carcinoma
+between 2006 and 2019. These variables are well suited for predictive
+modeling of patient survival outcomes. The dataset excludes patients
+with unknown tumor size, examined regional lymph nodes (LNs), regional
+positive LNs, and patients whose survival months were less than 1 month
+[@sembay2021seer].
 
--   Present initial findings and insights through visualizations.
+| Category | Variables |
+|------------------------------------|------------------------------------|
+| Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
+| Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
+| Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
+| Lymph Nodes | Nodes examined, nodes positive |
+| Outcome | Survival months, vital status (alive/dead) |
 
--   Highlight unexpected patterns or anomalies.
+: Table 1. Characteristics of the variables included in the study.
 
-A study was conducted to determine how...
+Using the variables defined above, analysis of the variables to predict
+survival will be analyzed. To start, below is the distribution of age at
+the time of breast cancer diagnosis.
 
 ```{r}
+library(ggplot2)
+data <- read.csv("SEER_Breast_Cancer_Data.csv")
 ```
 
-### Modeling and Results
+```{r}
+ggplot(data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) +
+  labs(title = "Age at Diagnosis",
+       x = "Age (Years)",
+       y = "Frequency") +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+```
+
+This histogram shows that patients are between ages 30 to 70 with a
+majority of diagnoses aged 50 and older. Due to the data that has been
+excluded in this study, the age of the women that have been diagnosed
+with breast cancer could vary if it were to be included. The next
+analysis shows a boxplot of survival based on stages of breast cancer.
+
+```{r}
+ggplot(data, aes(x = X6th.Stage, y = Survival.Months)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Survival by AJCC Stage",
+       x = "6th AJCC Stage",
+       y = "Survival Months") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
+
+```
+
+The boxplot shows that in general there is a general downward trend in
+survival months based on 6th AJCC cancer stages (IIA, IIB, IIIA, IIIB,
+IIIC). The early stages of breast cancer (IIA, IIB, IIIA) show a higher
+median survival where later stages (especially IIIC) show a lower median
+survival. This is suggesting that a higher stage breast cancer diagnosis
+is associated with shorter survival. Although, the median survival
+across the stages do not differ dramatically which shows that there is
+overlap between groups, thus stage alone may not fully explain a
+survival outcome. Due to the length of the whiskers, the length of
+survival varies widely within each stage and there may be other
+predictors that likely influence survival.
+
+```{r}
+#install.packages("survminer")
+library(survminer)
+library(survival)
+
+data$event <- ifelse(data$Status == "Dead", 1, 0)
+
+fit <- survfit(Surv(Survival.Months, event) ~ 1, data = data)
+
+plot <- ggsurvplot(fit,
+                   data = data,
+                   conf.int = TRUE,
+                   risk.table = TRUE,
+                   pval = FALSE,
+                   xlab = "Time (Months)",
+                   ylab = "Survival Probability",
+                   title = "Kaplan–Meier Survival Curve",
+                   palette = "blue")
+
+plot$plot <- plot$plot +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+plot
+
+
+```
+
+A Kaplan–Meier survival analysis was conducted to estimate the overall
+survival over a 100-month follow-up period. The survival curve indicates
+a gradual decline in survival probability over time, beginning at 100%
+at baseline and decreasing steadily to approximately 80% by 100 months.
+The stepwise pattern reflects the occurrence of events throughout the
+study period, while censoring is indicated by tick marks along the
+curve. The number at risk decreased over time, from 4,024 participants
+at baseline to 444 at 100 months, reflecting both events and censoring.
+Overall, the results suggest relatively high survival across the study
+population with a slow and consistent reduction in survival probability
+over time.
+
+### **Statistical Analysis**
+
+The selected demographic, clinical, and outcome variables were used as
+predictors in a LASSO regression model to identify factors associated
+with patient survival.
+
+The data was first prepared in order to be used for LASSO regression.
+Categorical predictors were converted into indicator variables so they
+could be included in the model. Continuous variables were scaled to
+common ranges to ensure that no single variable is dominated by the
+penalty applied by LASSO. Specifically, a penalized Cox proportional
+hazards model will be used for censored survival data. Observations that
+had missing values were removed to maintain consistency in the
+analysis.  
+
+Variable selection was performed using penalized Cox regression with an
+L1 (LASSO) penalty. LASSO regression can be defined by
+[@emmert2019high]:
+
+$$
+\hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\} 
+$$
+
+where $y_{i}$ represents the observed outcome, $x_{ij}$ denotes
+predictor values, β is the vector of regression coefficients, and λ is a
+tuning parameter which controls the strength of the penalty. The L1
+penalty encourages sparsity by shrinking weaker coefficients to zero
+which is what performs the automatic variable selection. 
+
+The analysis was conducted in R using the **glmnet** package which is
+designed for fitting penalized regression models. The strength of the
+penalty is controlled by λ. To select an appropriate value of λ, k-fold
+cross-validation was used. This process constantly splits the data into
+training and testing sets to evaluate the model performance and choose
+the penalty that produces the best balance between simplicity and
+predictive accuracy. 
+
+Predictors with non-zero coefficients in the final LASSO model were
+interpreted as significant variables associated with breast cancer
+survival. 
+
+## Modeling and Results
 
 -   Explain your data preprocessing and cleaning steps.
 
@@ -143,7 +274,7 @@ A study was conducted to determine how...
 
 ```
 
-### Conclusion
+## Conclusion
 
 -   Summarize your key findings.
 
