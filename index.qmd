@@ -219,7 +219,7 @@ Overall, the results suggest relatively high survival across the study
 population with a slow and consistent reduction in survival probability
 over time.
 
-### **Statistical Analysis**
+### Statistical Analysis
 
 The selected demographic, clinical, and outcome variables were used as
 predictors in a LASSO regression model to identify factors associated
