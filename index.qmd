@@ -109,9 +109,51 @@ overfitting and improving model stability [@lee2025machine].
 
 ## Methods
 
--   Detail the models or algorithms used.
+The selected demographic, clinical, and outcome variables were used as
+predictors in a LASSO-Cox regression model to identify factors
+associated with patient survival time.
 
--   Justify your choices based on the problem and data.
+The data were first prepared for use in the LASSO-Cox model. Categorical
+predictors were converted into indicator (dummy) variables so they could
+be included in the model. Continuous variables were scaled to common
+ranges to ensure that no single variable dominated the L1 penalty
+applied by LASSO. Because the outcome of interest was time to event, a
+penalized Cox proportional hazards model was used. Observations with
+missing values were removed to maintain consistency in the analysis.
+
+Variable selection was performed using a Cox proportional hazards model
+with an L1 (LASSO) penalty. In standard linear regression, LASSO is
+defined as [@emmert2019high]:
+
+$$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\}  $$
+
+where $y_{i}$ represents the observed outcome, $x_{ij}$ denotes
+predictor values, β is the vector of regression coefficients, and λ is a
+tuning parameter which controls the strength of the penalty. The L1
+penalty encourages sparsity by shrinking weaker coefficients to zero,
+thereby performing automatic variable selection.
+
+For the LASSO-Cox model, coefficients are instead estimated by
+maximizing the penalized Cox partioal likelihood:
+
+$$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda \sum_{j=1}^{p}|\beta_j| \right\} $$
+
+where PL(β) denotes the Cox partial likelihood function and λ is a
+positive tuning parameter that controls the amount of shrinkage
+[@shahraki2015survival]. The L1 penalty shrinks some regression
+coefficients to zero while estimating hazard ratios for the remaining
+predictors.
+
+The analysis was conducted in R using the glmnet package which is
+designed for fitting penalized regression models, including penalized
+Cox models. The strength of the penalty is controlled by λ. To select an
+appropriate value of λ, k-fold cross-validation sets to evaluate model
+performance and select the penalty that achieves an optimal balance
+between model complexity and predictive accuracy.
+
+Predictors with non-zero coefficients in the final LASSO model were
+interpreted as significant variables associated with breast cancer
+survival.
 
 ## Analysis and Results
 
@@ -226,57 +268,33 @@ Overall, the results suggest relatively high survival across the study
 population with a slow and consistent reduction in survival probability
 over time.
 
-### Statistical Analysis
+```{r}
+ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  labs(
+    title = "Distribution of Tumor Size by Survival Status",
+    x = "Survival Status",
+    y = "Tumor Size"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5)
+  )
+```
 
-The selected demographic, clinical, and outcome variables were used as
-predictors in a LASSO-Cox regression model to identify factors
-associated with patient survival time.
+The boxplot shows that there is a correlation between tumor size and
+survival status, as patients with larger tumor sizes tend to die
+compared to those with smaller tumor sizes. The Alive group shows a
+lower median tumor size, whereas the Dead group shows a higher median
+tumor size. There is overlap between the two groups, indicating that
+tumor size alone is not a strong predictor of survival in cancer
+patients. The wider spread and presence of several large outliers,
+particularly among deceased patients, suggest considerable variability
+and the influence of additional prognostic factors.
 
-The data were first prepared for use in the LASSO-Cox model. Categorical
-predictors were converted into indicator (dummy) variables so they could
-be included in the model. Continuous variables were scaled to common
-ranges to ensure that no single variable dominated the L1 penalty
-applied by LASSO. Because the outcome of interest was time to event, a
-penalized Cox proportional hazards model was used. Observations with
-missing values were removed to maintain consistency in the analysis.
-
-Variable selection was performed using a Cox proportional hazards model
-with an L1 (LASSO) penalty. In standard linear regression, LASSO is
-defined as [@emmert2019high]:
-
-$$
-\hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\} 
-$$
-
-where $y_{i}$ represents the observed outcome, $x_{ij}$ denotes
-predictor values, β is the vector of regression coefficients, and λ is a
-tuning parameter which controls the strength of the penalty. The L1
-penalty encourages sparsity by shrinking weaker coefficients to zero,
-thereby performing automatic variable selection.
-
-For the LASSO-Cox model, coefficients are instead estimated by
-maximizing the penalized Cox partioal likelihood:
-
-$$
-\hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda \sum_{j=1}^{p}|\beta_j| \right\}
-$$
-
-where PL(β) denotes the Cox partial likelihood function and λ is a
-positive tuning parameter that controls the amount of shrinkage
-[@shahraki2015survival]. The L1 penalty shrinks some regression
-coefficients to zero while estimating hazard ratios for the remaining
-predictors.
-
-The analysis was conducted in R using the glmnet package which is
-designed for fitting penalized regression models, including penalized
-Cox models. The strength of the penalty is controlled by λ. To select an
-appropriate value of λ, k-fold cross-validation sets to evaluate model
-performance and select the penalty that achieves an optimal balance
-between model complexity and predictive accuracy.
-
-Predictors with non-zero coefficients in the final LASSO model were
-interpreted as significant variables associated with breast cancer
-survival. 
+ 
 
 ## Modeling and Results
 
