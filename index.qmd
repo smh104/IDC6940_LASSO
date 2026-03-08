@@ -109,17 +109,12 @@ overfitting and improving model stability [@lee2025machine].
 
 ## Methods
 
-The selected demographic, clinical, and outcome variables were used as
-predictors in a LASSO-Cox regression model to identify factors
-associated with patient survival time.
-
-The data were first prepared for use in the LASSO-Cox model. Categorical
-predictors were converted into indicator (dummy) variables so they could
-be included in the model. Continuous variables were scaled to common
-ranges to ensure that no single variable dominated the L1 penalty
-applied by LASSO. Because the outcome of interest was time to event, a
-penalized Cox proportional hazards model was used. Observations with
-missing values were removed to maintain consistency in the analysis.
+Survivial analysis involves the statistical modeling of the time until
+an event, in this case death, occurs. Cox regression is widely used and
+an effective method for performing survival analysis. The selected
+demographic, clinical, and outcome variables were used as predictors in
+a LASSO-Cox regression model to identify factors associated with patient
+survival time.
 
 Variable selection was performed using a Cox proportional hazards model
 with an L1 (LASSO) penalty. In standard linear regression, LASSO is
@@ -130,11 +125,11 @@ $$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_
 where $y_{i}$ represents the observed outcome, $x_{ij}$ denotes
 predictor values, β is the vector of regression coefficients, and λ is a
 tuning parameter which controls the strength of the penalty. The L1
-penalty encourages sparsity by shrinking weaker coefficients to zero,
-thereby performing automatic variable selection.
+penalty encourages sparsity by shrinking weaker coefficients exactly to
+zero, thereby performing automatic variable selection.
 
 For the LASSO-Cox model, coefficients are instead estimated by
-maximizing the penalized Cox partioal likelihood:
+maximizing the penalized Cox partial likelihood:
 
 $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda \sum_{j=1}^{p}|\beta_j| \right\} $$
 
@@ -144,14 +139,26 @@ positive tuning parameter that controls the amount of shrinkage
 coefficients to zero while estimating hazard ratios for the remaining
 predictors.
 
-The analysis was conducted in R using the glmnet package which is
-designed for fitting penalized regression models, including penalized
-Cox models. The strength of the penalty is controlled by λ. To select an
-appropriate value of λ, k-fold cross-validation sets to evaluate model
-performance and select the penalty that achieves an optimal balance
-between model complexity and predictive accuracy.
+**Assumptions:**
 
-Predictors with non-zero coefficients in the final LASSO model were
+-   Hazard ratios between individuals remain constant over time
+    (proportional hazards assumption)
+
+-   Survival times of different patients are independent from one
+    another
+
+-   Censoring is assumed to be non-informative, meaning that the reason
+    for censoring is unrelated to the probability of the event
+
+The analysis was conducted in R (Version 4.4.2) using the glmnet package
+which is designed for fitting penalized regression models, including
+penalized Cox models. The strength of the penalty is controlled by λ. To
+select an appropriate value of λ, k-fold cross-validation was used. This
+procedure repeatedly partions the data into training and validation sets
+to evaluate model performance and select the penalty that achieves an
+optimal balance between model complexity and predictive accuracy.
+
+Predictors with non-zero coefficients in the final LASSO-Cox model are
 interpreted as significant variables associated with breast cancer
 survival.
 
@@ -185,7 +192,13 @@ survival will be analyzed. To start, below is the distribution of age at
 the time of breast cancer diagnosis.
 
 ```{r}
+#install.packages("survminer")
+#install.packages("glmnet")
+library(glmnet)
+library(survminer)
+library(survival)
 library(ggplot2)
+library(corrplot)
 data <- read.csv("SEER_Breast_Cancer_Data.csv")
 ```
 
@@ -199,6 +212,8 @@ ggplot(data, aes(x = Age)) +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 
 ```
+
+Graph #1. Distribution of age at breast cancer diagnosis.
 
 This histogram shows that patients are between ages 30 to 70 with a
 majority of diagnoses aged 50 and older. Due to the data that has been
@@ -217,6 +232,8 @@ ggplot(data, aes(x = X6th.Stage, y = Survival.Months)) +
 
 ```
 
+Graph #2. Distribution of survival time across AJCC stages.
+
 The boxplot shows that there is a general downward trend in survival
 months based on 6th AJCC cancer stages (IIA, IIB, IIIA, IIIB, IIIC). The
 early stages of breast cancer (IIA, IIB, IIIA) show a higher median
@@ -230,10 +247,6 @@ survival varies widely within each stage and there may be other
 predictors that likely influence survival.
 
 ```{r}
-#install.packages("survminer")
-library(survminer)
-library(survival)
-
 data$event <- ifelse(data$Status == "Dead", 1, 0)
 
 fit <- survfit(Surv(Survival.Months, event) ~ 1, data = data)
@@ -241,7 +254,9 @@ fit <- survfit(Surv(Survival.Months, event) ~ 1, data = data)
 plot <- ggsurvplot(fit,
                    data = data,
                    conf.int = TRUE,
+                   censor = FALSE,
                    risk.table = TRUE,
+                   size = 1.2, 
                    pval = FALSE,
                    xlab = "Time (Months)",
                    ylab = "Survival Probability",
@@ -256,17 +271,88 @@ plot
 
 ```
 
+Graph #3. Kaplan-Meier estimate of overall survival among breast cancer
+patients.
+
 A Kaplan–Meier survival analysis was conducted to estimate the overall
 survival over a 100-month follow-up period. The survival curve indicates
 a gradual decline in survival probability over time, beginning at 100%
-at baseline and decreasing steadily to approximately 80% by 100 months.
-The stepwise pattern reflects the occurrence of events throughout the
-study period, while censoring is indicated by tick marks along the
-curve. The number at risk decreased over time, from 4,024 participants
-at baseline to 444 at 100 months, reflecting both events and censoring.
+at baseline and decreasing steadily to approximately 78% by 100 months.
+The number at risk decreased over time, from 4,024 participants at
+baseline to 444 at 100 months, reflecting both events and censoring.
 Overall, the results suggest relatively high survival across the study
 population with a slow and consistent reduction in survival probability
 over time.
+
+```{r}
+data$event <- ifelse(data$Status == "Dead", 1, 0)
+data$X6th.Stage <- as.factor(data$X6th.Stage)
+
+fit <- survfit(Surv(Survival.Months, event) ~ X6th.Stage, data = data)
+
+plot <- ggsurvplot(fit, 
+                   data = data, 
+                   conf.int = TRUE, 
+                   risk.table = TRUE, 
+                   risk.table.height = .40, 
+                   risk.table.fontsize = 3.5, 
+                   pval = FALSE, 
+                   xlab = "Time (Months)",
+                   ylab = "Survival Probability",
+                   title = "Kaplan–Meier Survival Curves by 6th Stage",
+                   legend.labs = c("IIA","IIB","IIIA","IIIB","IIIC"))
+plot$plot <- plot$plot + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+plot
+
+```
+
+Graph #4 Kaplan–Meier Survival by Hormone Receptor Status
+
+This graph shows Kaplan–Meier survival curves grouped by the 6th stage
+classification. The curves illustrate how survival probability changes
+over time for patients diagnosed at different cancer stages. Patients
+diagnosed at earlier stages (IIA and IIB) generally show higher survival
+probabilities throughout the follow-up period. In contrast, patients
+diagnosed at later stages (IIIA, IIIB, and IIIC) experience a faster
+decline in survival probability over time.
+
+Among the later stages, stage IIIC appears to have the lowest survival
+probability, while stage IIIA and IIIB fall between the early and
+advanced stages. Overall, the curves suggest that patients diagnosed
+with more advanced stages tend to have lower survival probabilities
+compared to those diagnosed at earlier stages.
+
+The risk table below the graph shows the number of patients remaining at
+risk at different time points during the study period.
+
+```{r}
+numeric_data <- data[, c("Age","Tumor.Size","Regional.Node.Examined","Reginol.Node.Positive","Survival.Months")]
+numeric_data <- data.frame(lapply(numeric_data, as.numeric))
+cor_matrix <- cor(numeric_data, use = "complete.obs")
+#print(cor_matrix)
+corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black",tl.col = "black",tl.srt = 45,number.cex = 0.7,
+        title = "Correlation Between Continuous Variables", mar = c(0,0,2,0))
+
+```
+
+Graph #5: Correlation between continuous variables.
+
+This heatmap illustrates the correlations between age, tumor size,
+regional nodes examined, regional nodes positive, and survival months.
+The strongest relationship is observed between the number of regional
+lymph nodes examined and the number of positive lymph nodes. With a
+correlation coefficient of r = 0.41, this indicates that patients with
+more lymph nodes examined tend to have more positive nodes detected.
+Tumor size and the number of positive lymph nodes show a small to
+moderate positive correlation (r = 0.24), suggesting that larger tumors
+may be associated with increased lymph node involvement. A weak negative
+correlation is observed between positive lymph nodes and survival months
+(r = -0.14), indicating that greater lymph node involvement may be
+associated with shorter survival time. There appears to be little to no
+relationship between age and survival months (r = -0.01) in this
+dataset.
 
 ```{r}
 ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
@@ -284,6 +370,8 @@ ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
   )
 ```
 
+Graph #6: Distribution of Tumor Size by Survival Status
+
 The boxplot shows that there is a correlation between tumor size and
 survival status, as patients with larger tumor sizes tend to die
 compared to those with smaller tumor sizes. The Alive group shows a
@@ -294,8 +382,6 @@ patients. The wider spread and presence of several large outliers,
 particularly among deceased patients, suggest considerable variability
 and the influence of additional prognostic factors.
 
- 
-
 ## Modeling and Results
 
 -   Explain your data preprocessing and cleaning steps.
@@ -304,7 +390,15 @@ and the influence of additional prognostic factors.
 
 -   Use visuals to support your claims.
 
--   **Tell a story about what the data reveals.**
+-   Tell a story about what the data reveals.
+
+The data were first prepared for use in the LASSO-Cox model. Categorical
+predictors were converted into indicator (dummy) variables so they could
+be included in the model. Continuous variables were scaled to common
+ranges to ensure that no single variable dominated the L1 penalty
+applied by LASSO. Because the outcome of interest was time to event, a
+penalized Cox proportional hazards model was used. Observations with
+missing values were removed to maintain consistency in the analysis.
 
 ```{r}
 
