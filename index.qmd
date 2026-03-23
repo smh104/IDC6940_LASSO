@@ -199,11 +199,11 @@ library(survminer)
 library(survival)
 library(ggplot2)
 library(corrplot)
-data <- read.csv("SEER_Breast_Cancer_Data.csv")
+seer_data <- read.csv("SEER_Breast_Cancer_Data.csv")
 ```
 
 ```{r}
-ggplot(data, aes(x = Age)) +
+ggplot(seer_data, aes(x = Age)) +
   geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) +
   labs(title = "Age at Diagnosis",
        x = "Age (Years)",
@@ -222,7 +222,7 @@ with breast cancer could vary if it were to be included. The next
 analysis shows a boxplot of survival based on stages of breast cancer.
 
 ```{r}
-ggplot(data, aes(x = X6th.Stage, y = Survival.Months)) +
+ggplot(seer_data, aes(x = X6th.Stage, y = Survival.Months)) +
   geom_boxplot(fill = "lightblue") +
   labs(title = "Survival by AJCC Stage",
        x = "6th AJCC Stage",
@@ -247,12 +247,12 @@ survival varies widely within each stage and there may be other
 predictors that likely influence survival.
 
 ```{r}
-data$event <- ifelse(data$Status == "Dead", 1, 0)
+seer_data$event <- ifelse(seer_data$Status == "Dead", 1, 0)
 
-fit <- survfit(Surv(Survival.Months, event) ~ 1, data = data)
+fit <- survfit(Surv(Survival.Months, event) ~ 1, data = seer_data)
 
 plot <- ggsurvplot(fit,
-                   data = data,
+                   data = seer_data,
                    conf.int = TRUE,
                    censor = FALSE,
                    risk.table = TRUE,
@@ -285,13 +285,13 @@ population with a slow and consistent reduction in survival probability
 over time.
 
 ```{r}
-data$event <- ifelse(data$Status == "Dead", 1, 0)
-data$X6th.Stage <- as.factor(data$X6th.Stage)
+seer_data$event <- ifelse(seer_data$Status == "Dead", 1, 0)
+seer_data$X6th.Stage <- as.factor(seer_data$X6th.Stage)
 
-fit <- survfit(Surv(Survival.Months, event) ~ X6th.Stage, data = data)
+fit <- survfit(Surv(Survival.Months, event) ~ X6th.Stage, data = seer_data)
 
 plot <- ggsurvplot(fit, 
-                   data = data, 
+                   data = seer_data, 
                    conf.int = TRUE, 
                    risk.table = TRUE, 
                    risk.table.height = .40, 
@@ -328,7 +328,7 @@ The risk table below the graph shows the number of patients remaining at
 risk at different time points during the study period.
 
 ```{r}
-numeric_data <- data[, c("Age","Tumor.Size","Regional.Node.Examined","Reginol.Node.Positive","Survival.Months")]
+numeric_data <- seer_data[, c("Age","Tumor.Size","Regional.Node.Examined","Reginol.Node.Positive","Survival.Months")]
 numeric_data <- data.frame(lapply(numeric_data, as.numeric))
 cor_matrix <- cor(numeric_data, use = "complete.obs")
 #print(cor_matrix)
@@ -355,7 +355,7 @@ relationship between age and survival months (r = -0.01) in this
 dataset.
 
 ```{r}
-ggplot(data, aes(x = Status, y = Tumor.Size, fill = Status)) +
+ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
   geom_boxplot(alpha = 0.7) +
   geom_jitter(width = 0.2, alpha = 0.3) +
   labs(
@@ -384,30 +384,116 @@ and the influence of additional prognostic factors.
 
 ## Modeling and Results
 
--   Explain your data preprocessing and cleaning steps.
+To identify key predictors of breast cancer survival among patients in
+the SEER dataset, a LASSO-penalized Cox proportional hazards model was
+used. The data were first prepared for use in the LASSO-Cox model.
 
--   Present your key findings in a clear and concise manner.
-
--   Use visuals to support your claims.
-
--   Tell a story about what the data reveals.
-
-The data were first prepared for use in the LASSO-Cox model. Categorical
-predictors were converted into indicator (dummy) variables so they could
-be included in the model. Continuous variables were scaled to common
-ranges to ensure that no single variable dominated the L1 penalty
-applied by LASSO. Because the outcome of interest was time to event, a
-penalized Cox proportional hazards model was used. Observations with
-missing values were removed to maintain consistency in the analysis.
+Categorical predictors were converted into indicator (dummy) variables
+so they could be included in the model. Continuous variables were
+standardized automatically within the glmnet framework to ensure that no
+single variable dominated the L1 penalty applied by LASSO. Because the
+outcome of interest was time to event, a penalized Cox proportional
+hazards model was used. Observations with missing values were removed to
+maintain consistency in the analysis.
 
 ```{r}
+#remove observations with missing values
+vars <- c("Age", "Race", "Marital.Status", "T.Stage", "N.Stage", "X6th.Stage", "Grade", "A.Stage", "Tumor.Size", "Estrogen.Status", "Progesterone.Status", "Regional.Node.Examined", "Reginol.Node.Positive", "Survival.Months", "Status")
+
+#Subset the dataset to include only the variables used in the survival analysis
+
+model_data <- seer_data[, vars]
+
+#Remove observations with missing values
+model_data <- na.omit(model_data)
+
+#Create an event indicator variable required for survival analysis
+# 1 indicates the event occurred (death) and 0 indicates censored observations (alive)
+model_data$event <- ifelse(model_data$Status == "Dead", 1, 0)
 
 ```
+
+A survival object was created using the survival time and event
+indicator. Predictor variables were converted into a model matrix to
+provide a numeric input suitable for the glmnet package, with
+categorical variables represented through dummy coding. A penalized Cox
+proportional hazards model (LASSO) was then fit using glmnet which
+estimated regression coefficients while applying regularization to
+perform variable selection.
+
+```{r}
+y <- Surv(model_data$Survival.Months, model_data$event)
+
+#x <- model.matrix(Surv(Survival.Months, event) ~ Age + Race + Marital.Status + T.Stage + N.Stage + X6th.Stage + Grade + A.Stage + Tumor.Size + Estrogen.Status + Progesterone.Status + Regional.Node.Examined + Reginol.Node.Positive, data = model_data)[,-1]
+
+x <- model.matrix(event ~ . - event - Status - Survival.Months, data = model_data)[,-1]
+
+
+#Fit a penalized cox regression model using glmnet
+fit <- glmnet(x, y, family = "cox")
+plot(fit)
+```
+
+The above coefficient path plot demonstrates how predictor effects
+evolve as the penalty parameter (λ) decreases. The x-axis, shown as
+-log(λ), represents the strength of the penalty, with the left side
+corresponding to stronger regularizations and a simpler model, and the
+right side corresponding to weaker regularization and a more complex
+model with additional variables. The y-axis displays the estimated
+coefficients, indicating the magnitude and direction of each predictor's
+effects. A negative value represents a decreased hazard where a positive
+value annotates an increased hazard. The numbers along the top of the
+model represent the number of non-zero coefficients at each value of λ,
+demonstrating that more variables enter the model as the penalty
+decreases.
+
+The function 'cv.glmnet()' was used to determine the optimal value of
+the penalty parameter (λ) through k-fold cross-validation. This approach
+evaluates model performance across a sequence of λ values by estimating
+the cross-validation partial liklihood deviance. The resulting plot
+displays the mean cross-validation error and associated confidence
+intervals for each λ.
+
+```{r}
+#Perform cross-validation to identify the optimal lambda value
+cvfit <- cv.glmnet(x, y, family = "cox", alpha = 1)
+
+#Plot the cross-validation error across lambda values
+plot(cvfit)
+```
+
+The optimal value of λ identified through cross-validation is determined
+by cvfit\$lambda.min. The coefficients corresponding to the optimal λ
+value are then extracted to identify predictors with non-zero
+coefficients that remain in the final LASSO-Cox model.
+
+```{r}
+cvfit$lambda.min
+coef(cvfit, s = "lambda.min")
+```
+
+The following coefficients represent predictors with non-zero values
+selected by the LASSO-Cox proportional hazards model and are interpreted
+as key factors influencing survival outcomes.
+
+```{r}
+lasso_coef <- coef(cvfit, s = "lambda.min")
+lasso_coef[lasso_coef != 0]
+```
+
+The final LASSO-penalized Cox model identified 22 predictors with
+non-zero coefficients at the optimal penalty parameter, highlighting the
+most influential variables associated with survival outcomes. The
+variables with positive coefficients were linked to an increased hazard,
+or worse survival, while negative coefficients were linked to a
+decreased hazard, or better survival.
 
 ## Conclusion
 
 -   Summarize your key findings.
 
 -   Discuss the implications of your results.
+
+ChatGPT was used to assist with grammar and vocabulary corrections.
 
 ## References
