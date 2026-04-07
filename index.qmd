@@ -499,7 +499,7 @@ kable(
 )
 ```
 
-The final LASSO-penalized Cox model identified 25 predictors with
+The final LASSO-penalized Cox model identified 22 predictors with
 non-zero coefficients at the optimal penalty parameter, highlighting the
 most influential variables associated with survival outcomes. The
 variables with positive coefficients were linked to an increased hazard,
