@@ -213,7 +213,7 @@ ggplot(seer_data, aes(x = Age)) +
 
 ```
 
-Graph #1. Distribution of age at breast cancer diagnosis.
+Graph 1: Distribution of age at breast cancer diagnosis.
 
 This histogram shows that patients are between ages 30 to 70 with a
 majority of diagnoses aged 50 and older. Due to the data that has been
@@ -232,7 +232,7 @@ ggplot(seer_data, aes(x = X6th.Stage, y = Survival.Months)) +
 
 ```
 
-Graph #2. Distribution of survival time across AJCC stages.
+Graph 2: Distribution of survival time across AJCC stages.
 
 The boxplot shows that there is a general downward trend in survival
 months based on 6th AJCC cancer stages (IIA, IIB, IIIA, IIIB, IIIC). The
@@ -271,7 +271,7 @@ plot
 
 ```
 
-Graph #3. Kaplan-Meier estimate of overall survival among breast cancer
+Graph 3: Kaplan-Meier estimate of overall survival among breast cancer
 patients.
 
 A Kaplan–Meier survival analysis was conducted to estimate the overall
@@ -308,7 +308,7 @@ plot
 
 ```
 
-Graph #4 Kaplan–Meier Survival by Hormone Receptor Status
+Graph 4: Kaplan–Meier Survival by 6th Stage
 
 This graph shows Kaplan–Meier survival curves grouped by the 6th stage
 classification. The curves illustrate how survival probability changes
@@ -337,7 +337,7 @@ corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black",tl.
 
 ```
 
-Graph #5: Correlation between continuous variables.
+Graph 5: Correlation between continuous variables.
 
 This heatmap illustrates the correlations between age, tumor size,
 regional nodes examined, regional nodes positive, and survival months.
@@ -370,7 +370,7 @@ ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
   )
 ```
 
-Graph #6: Distribution of Tumor Size by Survival Status
+Graph 6: Distribution of Tumor Size by Survival Status
 
 The boxplot shows that there is a correlation between tumor size and
 survival status, as patients with larger tumor sizes tend to die
@@ -450,7 +450,7 @@ decreases.
 The function 'cv.glmnet()' was used to determine the optimal value of
 the penalty parameter (λ) through k-fold cross-validation. This approach
 evaluates model performance across a sequence of λ values by estimating
-the cross-validation partial liklihood deviance. The resulting plot
+the cross-validation partial likelihood deviance. The resulting plot
 displays the mean cross-validation error and associated confidence
 intervals for each λ.
 
@@ -468,20 +468,38 @@ value are then extracted to identify predictors with non-zero
 coefficients that remain in the final LASSO-Cox model.
 
 ```{r}
-cvfit$lambda.min
-coef(cvfit, s = "lambda.min")
+library(knitr)
+lasso_coef <-coef(cvfit, s = "lambda.min")
+coef_vector <- as.vector(lasso_coef)
+
+#Build data frame
+coef_df <- data.frame(
+  Variable = rownames(lasso_coef),
+  Coefficient = coef_vector,
+  stringsAsFactors = FALSE
+)
+
+#Keep only non-zero coefficients
+coef_df <- coef_df[!is.na(coef_df$Coefficient), ]
+coef_df <- coef_df[coef_df$Coefficient !=0, ]
+
+#Add interpretation
+coef_df$Interpretation <- ifelse(
+  coef_df$Coefficient > 0,
+  "Increased hazard (worse survival)",
+  "Decreased hazard (better survival)"
+)
+
+#Print table
+kable(
+  coef_df,
+  caption = "Selected Predictors from the LASSO-Cox Model",
+  digits = 3,
+  align = "lcc"
+)
 ```
 
-The following coefficients represent predictors with non-zero values
-selected by the LASSO-Cox proportional hazards model and are interpreted
-as key factors influencing survival outcomes.
-
-```{r}
-lasso_coef <- coef(cvfit, s = "lambda.min")
-lasso_coef[lasso_coef != 0]
-```
-
-The final LASSO-penalized Cox model identified 22 predictors with
+The final LASSO-penalized Cox model identified 25 predictors with
 non-zero coefficients at the optimal penalty parameter, highlighting the
 most influential variables associated with survival outcomes. The
 variables with positive coefficients were linked to an increased hazard,
@@ -490,9 +508,50 @@ decreased hazard, or better survival.
 
 ## Conclusion
 
--   Summarize your key findings.
+This study applied a LASSO-penalized Cox proportional hazards model to
+identify key predictors of survival among breast cancer patients using
+data from the SEER database. By reducing the contribution of less
+important variables and incorporating an L1 penalty, the approach
+effectively reduced model complexity while selecting the most relevant
+variables associated with patient outcomes.
 
--   Discuss the implications of your results.
+The results of the analysis identified several important clinical and
+demographic predictors of survival. The five most influential variables
+selected by the LASSO-Cox model included Grade IV (Undifferentiated;
+Anaplastic) ($\beta = 1.058$), Other races (American Indian/AK Native,
+Asian/Pacific Islander) ($\beta = -0.649$), N stage N3
+($\beta = 0.648$), estrogen receptor positive status ($\beta = -0.641$),
+and T stage T4 ($\beta = 0.599$). Patients with Grade IV tumors, N stage
+N3, and T stage T4 exhibited worse survival outcomes, reflecting the
+impact of tumor aggressiveness and advanced disease progression. In
+contrast, patients classified as Other races and those with positive
+estrogen receptor status showed improved survival, suggesting that both
+demographic and biological factors play a meaningful role in prognosis.
+
+On the other hand, the model also determined the variables that have a
+smaller, but still noticeable effect on survival. Variables such as
+tumor size ($\beta = 0.003$), regional nodes examined
+($\beta = -0.029$), and AJCC stage IIIC ($\beta = 0.026$) showed very
+small coefficients, suggesting they were less influential compared to
+the primary predictors identified.
+
+Despite these insights, a few limitations should be acknowledged. The
+SEER database is observational in nature rather than through a
+controlled experiment. Additionally, based on the dataset, it is unknown
+what treatment regimens and genetic factors were included in the
+analysis which may influence survival factors. Lastly, a different
+penalty parameter (λ) could lead to a slightly different set of
+predictors. In the future, research could build upon this work by adding
+additional clinical and molecular variables while comparing other
+modeling approaches. Extending this research and models would help to
+provide generalization and reliability to the results.
+
+Overall, the LASSO-Cox model provides a powerful and interpretable
+framework for identifying key predictors of breast cancer survival. The
+results highlight the importance of tumor grade, disease stage, and
+hormone receptor status in shaping patient outcomes and demonstrate the
+value of regularized regression techniques in analyzing complex clinical
+data.
 
 ChatGPT was used to assist with grammar and vocabulary corrections.
 
