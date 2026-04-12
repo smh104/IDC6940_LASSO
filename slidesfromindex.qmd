@@ -133,7 +133,7 @@ $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda 
     months were less than 1 month
 
 | Category | Variables |
-|------------------------------------|------------------------------------|
+|----|----|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
@@ -446,8 +446,8 @@ kable(
 :::
 
 ## Conclusion
-::: {style="font-size: 24px;"}
 
+::: {style="font-size: 24px;"}
 -   Identified 22 predictors with non-zero coefficients at the optimal
     penalty parameter
 

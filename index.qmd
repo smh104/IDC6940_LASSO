@@ -18,8 +18,7 @@ editor:
     wrap: 72
 ---
 
-Slides: [slidesfromindex.html](slides.html){target="_blank"} ( Go to
-`slidesfromindex.qmd` to edit)
+Slides: [slidesfromindex.html](slidesfromindex.html){target="_blank"}
 
 ## Introduction
 
@@ -179,7 +178,7 @@ excludes patients with unknown tumor size, examined regional lymph nodes
 less than 1 month [@sembay2021seer].
 
 | Category | Variables |
-|------------------------------------|------------------------------------|
+|----|----|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
