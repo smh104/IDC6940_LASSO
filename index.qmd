@@ -1,6 +1,6 @@
 ---
 title: "Determining Predictors in Survival for Breast Cancer Patients Using LASSO Regression"
-subtitle: "Spring 2026"
+subtitle: ""
 author: "Stephanie Hopkins & Aminata Gado Oumarou (Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
@@ -179,7 +179,7 @@ excludes patients with unknown tumor size, examined regional lymph nodes
 less than 1 month [@sembay2021seer].
 
 | Category | Variables |
-|----|----|
+|------------------------------------|------------------------------------|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
