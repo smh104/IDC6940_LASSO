@@ -1,6 +1,6 @@
 ---
-title: "LASSO Regression - Spring 2026 "
-subtitle: "Determining Predictors in Survival for Breast Cancer Patients"
+title: "Determining Predictors in Survival for Breast Cancer Patients Using LASSO Regression"
+subtitle: "Spring 2026"
 author: "Stephanie Hopkins & Aminata Gado Oumarou (Advisor: Dr. Cohen)"
 date: '`r Sys.Date()`'
 format:
@@ -18,8 +18,8 @@ editor:
     wrap: 72
 ---
 
-Slides: [slides.html](slides.html){target="_blank"} ( Go to `slides.qmd`
-to edit)
+Slides: [slidesfromindex.html](slides.html){target="_blank"} ( Go to
+`slidesfromindex.qmd` to edit)
 
 ## Introduction
 
@@ -109,9 +109,9 @@ overfitting and improving model stability [@lee2025machine].
 
 ## Methods
 
-Survivial analysis involves the statistical modeling of the time until
-an event, in this case death, occurs. Cox regression is widely used and
-an effective method for performing survival analysis. The selected
+Survival analysis involves the statistical modeling of the time until an
+event, in this case death, occurs. Cox regression is widely used and an
+effective method for performing survival analysis. The selected
 demographic, clinical, and outcome variables were used as predictors in
 a LASSO-Cox regression model to identify factors associated with patient
 survival time.
@@ -166,19 +166,20 @@ survival.
 
 ### Data Exploration and Visualization
 
-This study uses breast cancer data from the Surveillance, Epidemiology,
-and End Results (SEER) program, which is maintained by the National
-Cancer Institute (NCI). The dataset, composed of 4,024 patients,
-includes demographic, clinical, and outcome variables for female
-patients diagnosed with infiltrating ductal and lobular breast carcinoma
-between 2006 and 2019. These variables are well suited for predictive
-modeling of patient survival outcomes. The dataset excludes patients
-with unknown tumor size, examined regional lymph nodes (LNs), regional
-positive LNs, and patients whose survival months were less than 1 month
-[@sembay2021seer].
+The goal of this analysis is to determine predictors in survival for
+breast cancer patients. This study uses breast cancer data from the
+Surveillance, Epidemiology, and End Results (SEER) program, which is
+maintained by the National Cancer Institute (NCI). The dataset, composed
+of 4,024 patients, includes demographic, clinical, and outcome variables
+for female patients diagnosed with infiltrating ductal and lobular
+breast carcinoma between 2006 and 2019. These variables are well suited
+for predictive modeling of patient survival outcomes. The dataset
+excludes patients with unknown tumor size, examined regional lymph nodes
+(LNs), regional positive LNs, and patients whose survival months were
+less than 1 month [@sembay2021seer].
 
 | Category | Variables |
-|------------------------------------|------------------------------------|
+|----|----|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
