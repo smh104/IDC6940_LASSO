@@ -99,7 +99,7 @@ ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
 ::: {.panel-tabset}
 
 ### LASSO Regression
-::: {style="font-size: 24px;"}
+::: {style="font-size: 20px;"}
 
 -   LASSO is defined as:
 
