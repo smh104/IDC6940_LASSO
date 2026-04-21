@@ -236,10 +236,10 @@ plot
 
 ```
 
--   Patients diagnosed at earlier stages (IIA and IIB) generally show
+-   Patients diagnosed at earlier stages (IIA, IIB) generally show
     higher survival probabilities throughout the follow-up period
 
--   Patients diagnosed at later stages (IIIA, IIIB, and IIIC) experience
+-   Patients diagnosed at later stages (IIIA, IIIB, IIIC) experience
     a faster decline in survival probability over time
 
 -   Suggests patients diagnosed with more advanced stages tend to have
