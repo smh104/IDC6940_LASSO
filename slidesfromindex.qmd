@@ -19,7 +19,7 @@ editor:
     wrap: 72
 ---
 
-## Introduction - LASSO Regression
+## Introduction: What is LASSO Regression?
 
 ::: {style="font-size: 24px;"}
 -   LASSO - Least Absolute Shrinkage and Selection Operator
@@ -27,54 +27,80 @@ editor:
 -   Introduced by Robert Tibshirani in 1996
 
 -   Method for variable selection and regularization to improve
-    prediction accuracy and interpretability
+    prediction accuracy and interpretability [@ranstam2018lasso]
 
--   Minimizes prediction error while applying a constraint that shrinks
-    some regression coefficients toward zero by adding L1 penalty term
+    -   shrinks less important variables to zero
 
--   Cox proportional hazards model in survival analysis - improves
-    estimation stability, and produces a sparse and interpretable model
+    -   helps prevent overfitting
 
 -   Widely used - medicine, biology, computational social sciences,
     social media, the stock market, economics, political science,
-    robotics, climatology, and pharmacology
+    robotics, climatology, and pharmacology [@emmert2019high]
 :::
 
-## Introduction - Breast Cancer
+
+## Introduction: Breast Cancer
 
 ::: {style="font-size: 24px;"}
--   LASSO-Cox regression to identify the factors most strongly
-    associated with breast cancer survival time
 
--   Begins in the breast’s tissues and develops in the epithelial cells
-    of the ducts (85% of cases) and lobules (15%)
+- In 2019, over 3.8 million people in the U.S. were living with breast cancer. In 2025, 2.04 million new cancer cases were diagnosed. It is the most commonly diagnosed cancer among women and the second most common cancer globally [@usman2021comparing] [@nci2025statistics]
 
--   Causes: hereditary factors, age, postmenopausal obesity, alcohol or
-    smoking, and other factors
+- There are many causes, including hereditary factors, age, obesity, alcohol or smoking, and other factors
 
--   2019: more than 3.8 million individuals in the United States were
-    living with breast cancer, and it is still the most commonly
-    diagnosed cancer among women and the second most common cancer
-    globally [@usman2021comparing].
+- Prognosis and survival are commonly grouped into three categories: (1) demographic and genetic characteristics, (2) clinicopathological factors, and (3) treatment-related variables such as drug therapy, radiotherapy, and chemotherapy [@teng2022dynamic]
 
--   2025: estimated 2,041,910 new cancer cases diagnosed in the United
-    States, and approximately 618,120 people are expected to die from
-    the disease [@nci2025statistics]
-
--   Prognosis and survival commonly grouped into three categories: (1)
-    demographic and genetic characteristics, such as age at diagnosis,
-    marital status, and reproductive history; (2) clinicopathological
-    factors, including tumor location, size, and histologic grade;
-    and (3) treatment-related variables, such as drug therapy,
-    radiotherapy, and chemotherapy [@teng2022dynamic].
-
--   Using the SEER dataset, apply LASSO-Cox regression to identify key
-    clinical variables associated with breast cancer survival
 :::
 
-## Methods - LASSO Regression
+:::: {.columns}
 
+::: {.column width="50%"}
+
+```{r, echo=FALSE}
+library(glmnet)
+library(survminer)
+library(survival)
+library(ggplot2)
+library(corrplot)
+
+seer_data <- read.csv("SEER_Breast_Cancer_Data.csv")
+
+ggplot(seer_data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) +
+  labs(
+    title = "Age at Diagnosis",
+    x = "Age (Years)",
+    y = "Frequency"
+  ) +
+  theme_minimal() + 
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+:::
+
+::: {.column width="50%"}
+```{r}
+ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.3) +
+  labs(
+    title = "Tumor Size by Survival Status",
+    x = "Survival Status",
+    y = "Tumor Size"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+:::
+
+::::
+
+
+
+## Methods
+::: {.panel-tabset}
+
+### LASSO Regression
 ::: {style="font-size: 24px;"}
+
 -   LASSO is defined as:
 
 $$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\}  $$
@@ -91,15 +117,18 @@ $$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_
     exactly to zero
 :::
 
-## Methods - LASSO-Cox Model
+---
 
-::: {style="font-size: 24px;"}
+### LASSO-Cox Regression
+::: {style="font-size: 20px;"}
+
+
 -   For the LASSO-Cox model, coefficients are instead estimated by
     maximizing the penalized Cox partial likelihood:
 
 $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda \sum_{j=1}^{p}|\beta_j| \right\} $$
 
--   PL(β) denotes the Cox partial likelihood function and
+-   PL(β) denotes the Cox partial likelihood function 
 
 -   λ is a positive tuning parameter that controls the amount of
     shrinkage
@@ -118,10 +147,11 @@ $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda 
 -   Censoring is assumed to be non-informative, meaning that the reason
     for censoring is unrelated to the probability of the event
 :::
+:::
 
 ## Analysis and Results
 
-::: {style="font-size: 24px;"}
+::: {style="font-size: 20px;"}
 -   Determine predictors in survival for breast cancer patients using
     Surveillance, Epidemiology, and End Results (SEER) dataset
 
@@ -133,7 +163,7 @@ $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda 
     months were less than 1 month
 
 | Category | Variables |
-|----|----|
+|------------------------------------|------------------------------------|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
@@ -141,56 +171,6 @@ $$ \hat{\beta}_{\text{LASSO-Cox}} = \arg_{\beta}\max\left \{PL(\beta) - \lambda 
 | Outcome | Survival months, vital status (alive/dead) |
 
 : Table 1. Characteristics of the variables included in the study.
-:::
-
-## Distribution of Age at Diagnosis
-
-```{r}
-#install.packages("survminer")
-#install.packages("glmnet")
-library(glmnet)
-library(survminer)
-library(survival)
-library(ggplot2)
-library(corrplot)
-seer_data <- read.csv("SEER_Breast_Cancer_Data.csv")
-```
-
-```{r}
-ggplot(seer_data, aes(x = Age)) +
-  geom_histogram(binwidth = 5, fill = "steelblue", color = "black", alpha = 0.7) +
-  labs(title = "Age at Diagnosis",
-       x = "Age (Years)",
-       y = "Frequency") +
-  theme_minimal() + 
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-
-```
-
--   Patients are between ages 30 to 70 with a majority of diagnoses aged
-    50 and older
-
-## Survival Time Across AJCC Stages
-
-::: {style="font-size: 24px;"}
-```{r}
-ggplot(seer_data, aes(x = X6th.Stage, y = Survival.Months)) +
-  geom_boxplot(fill = "lightblue") +
-  labs(title = "Survival by AJCC Stage",
-       x = "6th AJCC Stage",
-       y = "Survival Months") +
-  theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold")) 
-
-```
-
--   Downward trend in survival months based on 6th AJCC cancer stages
-    (IIA, IIB, IIIA, IIIB, IIIC)
-
--   Early stages of breast cancer (IIA, IIB, IIIA) show a higher median
-    survival
-
--   Later stages (especially IIIC) show a lower median survival
 :::
 
 ## Kaplan-Meier Estimate of Survival
@@ -267,56 +247,8 @@ plot
     stages
 :::
 
-## Correlation of Continuous Variables
 
-::: {style="font-size: 20px;"}
-```{r}
-numeric_data <- seer_data[, c("Age","Tumor.Size","Regional.Node.Examined","Reginol.Node.Positive","Survival.Months")]
-numeric_data <- data.frame(lapply(numeric_data, as.numeric))
-cor_matrix <- cor(numeric_data, use = "complete.obs")
-#print(cor_matrix)
-corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black",tl.col = "black",tl.srt = 45,number.cex = 0.7,
-        title = "Correlation Between Continuous Variables", mar = c(0,0,2,0))
 
-```
-
--   Correlations between age, tumor size, regional nodes examined,
-    regional nodes positive, and survival months
-
--   Strongest relationship is observed between the number of regional
-    lymph nodes examined and the number of positive lymph nodes.
-
--   Weak negative correlation is observed between positive lymph nodes
-    and survival months
-:::
-
-## Tumor Size by Survival Status
-
-::: {style="font-size: 20px;"}
-```{r}
-ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
-  geom_boxplot(alpha = 0.7) +
-  geom_jitter(width = 0.2, alpha = 0.3) +
-  labs(
-    title = "Distribution of Tumor Size by Survival Status",
-    x = "Survival Status",
-    y = "Tumor Size"
-  ) +
-  theme_minimal() +
-  theme(
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5)
-  )
-```
-
--   Correlation between tumor size and survival status - patients with
-    larger tumor sizes tend to die compared to those with smaller tumor
-    sizes.
-
--   Wider spread and presence of several large outliers, particularly
-    among deceased patients, suggest considerable variability and the
-    influence of additional prognostic factors
-:::
 
 ## Modeling and Results
 
@@ -382,7 +314,7 @@ plot(fit)
 -   The x-axis, -log(λ), represents the strength of the penalty
 
 -   The y-axis displays the estimated coefficients, indicating the
-    magnitude and direction of each predictor's effects.
+    magnitude and direction of each predictor's effects
 
 -   The numbers along the top of the model represent the number of
     non-zero coefficients at each value of λ
@@ -402,11 +334,11 @@ plot(cvfit)
 -   Displays the mean cross-validation error and associated confidence
     intervals for each λ
 
--   Identified through k-fold cross-validation determined by
-    cvfit\$lambda.min
+-   Error decreases as more variables are included, then stabilizes
 
--   Corresponding coefficients extracted to identify predictors with
-    non-zero coefficients
+-   Optimal λ is selected using cross-validation
+
+-   Indicates that a simpler model performs similarly to a more complex one
 :::
 
 ## LASSO-Cox Model Results
@@ -470,7 +402,7 @@ kable(
     improved survival
 
 -   Both demographic and biological factors play a meaningful role in
-    prognosis.
+    prognosis
 
 -   Different penalty parameter (λ) could lead to a slightly different
     set of predictors
