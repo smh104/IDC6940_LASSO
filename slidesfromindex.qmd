@@ -29,9 +29,9 @@ editor:
 -   Method for variable selection and regularization to improve
     prediction accuracy and interpretability [@ranstam2018lasso]
 
-    -   shrinks less important variables to zero
+    -   Shrinks less important variables to zero
 
-    -   helps prevent overfitting
+    -   Helps prevent overfitting
 
 -   Widely used - medicine, biology, computational social sciences,
     social media, the stock market, economics, political science,
@@ -56,6 +56,8 @@ editor:
 ::: {.column width="50%"}
 
 ```{r, echo=FALSE}
+#install.packages("survminer")
+#install.packages("glmnet")
 library(glmnet)
 library(survminer)
 library(survival)
@@ -87,7 +89,9 @@ ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
     y = "Tumor Size"
   ) +
   theme_minimal() +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  theme(
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
 :::
 
@@ -101,7 +105,7 @@ ggplot(seer_data, aes(x = Status, y = Tumor.Size, fill = Status)) +
 ### LASSO Regression
 ::: {style="font-size: 20px;"}
 
--   LASSO is defined as:
+-   LASSO is defined as [@emmert2019high]:
 
 $$ \hat{\beta} = arg \space \min \left\{\frac{1}{2n} \sum_{i=1}^{n} (y_i - \sum_{j} \beta_j x_{ij})^2 + \lambda||\beta||_1\right\}  $$
 
@@ -264,7 +268,7 @@ plot
     penalty applied by LASSO
 
 -   Observations with missing values were removed to maintain
-    consistency in the analysis.
+    consistency in the analysis
 
 ```{r}
 #remove observations with missing values
@@ -325,8 +329,9 @@ plot(fit)
 ::: {style="font-size: 20px;"}
 ```{r}
 #Perform cross-validation to identify the optimal lambda value
-cvfit <- cv.glmnet(x, y, family = "cox", alpha = 1)
+#cvfit <- cv.glmnet(x, y, family = "cox", alpha = 1)
 
+cvfit <- readRDS("cvfit_locked.rds")
 #Plot the cross-validation error across lambda values
 plot(cvfit)
 ```
@@ -390,10 +395,10 @@ kable(
     survival
 
 -   Five most influential variables selected: Grade IV
-    (Undifferentiated; Anaplastic) ($\beta = 1.058$), Other races
+    (Undifferentiated; Anaplastic) ($\beta = 1.049$), Other races
     (American Indian/AK Native, Asian/Pacific Islander)
-    ($\beta = -0.649$), N stage N3 ($\beta = 0.648$), estrogen receptor
-    positive status ($\beta = -0.641$), and T stage T4 ($\beta = 0.599$)
+    ($\beta = -0.632$), N stage N3 ($\beta = 0.639$), estrogen receptor
+    positive status ($\beta = -0.640$), and T stage T4 ($\beta = 0.591$)
 
 -   Patients with Grade IV tumors, N stage N3, and T stage T4 exhibited
     worse survival outcomes

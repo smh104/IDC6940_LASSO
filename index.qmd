@@ -178,7 +178,7 @@ excludes patients with unknown tumor size, examined regional lymph nodes
 less than 1 month [@sembay2021seer].
 
 | Category | Variables |
-|----|----|
+|------------------------------------|------------------------------------|
 | Demographics | Age at diagnosis, race, marital status (married, single, widowed, divorced, separated) |
 | Tumor Characteristics | T stage (T1–T4), N stage (N1–N3), 6th AJCC stage (IIA–IIIC), tumor grade (I–IV), A stage (regional/distant), tumor size |
 | Hormone Receptors | Estrogen status, progesterone status (positive/negative) |
@@ -456,7 +456,10 @@ intervals for each λ.
 
 ```{r}
 #Perform cross-validation to identify the optimal lambda value
-cvfit <- cv.glmnet(x, y, family = "cox", alpha = 1)
+#cvfit <- cv.glmnet(x, y, family = "cox", alpha = 1)
+
+#To keep renders the same during render's, values are locked
+cvfit <- readRDS("cvfit_locked.rds")
 
 #Plot the cross-validation error across lambda values
 plot(cvfit)
@@ -518,10 +521,10 @@ variables associated with patient outcomes.
 The results of the analysis identified several important clinical and
 demographic predictors of survival. The five most influential variables
 selected by the LASSO-Cox model included Grade IV (Undifferentiated;
-Anaplastic) ($\beta = 1.058$), Other races (American Indian/AK Native,
-Asian/Pacific Islander) ($\beta = -0.649$), N stage N3
-($\beta = 0.648$), estrogen receptor positive status ($\beta = -0.641$),
-and T stage T4 ($\beta = 0.599$). Patients with Grade IV tumors, N stage
+Anaplastic) ($\beta = 1.049$), Other races (American Indian/AK Native,
+Asian/Pacific Islander) ($\beta = -0.632$), N stage N3
+($\beta = 0.639$), estrogen receptor positive status ($\beta = -0.640$),
+and T stage T4 ($\beta = 0.591$). Patients with Grade IV tumors, N stage
 N3, and T stage T4 exhibited worse survival outcomes, reflecting the
 impact of tumor aggressiveness and advanced disease progression. In
 contrast, patients classified as Other races and those with positive
@@ -531,7 +534,7 @@ demographic and biological factors play a meaningful role in prognosis.
 On the other hand, the model also determined the variables that have a
 smaller, but still noticeable effect on survival. Variables such as
 tumor size ($\beta = 0.003$), regional nodes examined
-($\beta = -0.029$), and AJCC stage IIIC ($\beta = 0.026$) showed very
+($\beta = -0.030$), and AJCC stage IIIC ($\beta = 0.028$) showed very
 small coefficients, suggesting they were less influential compared to
 the primary predictors identified.
 
